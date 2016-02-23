@@ -20,11 +20,12 @@ import javafx.stage.Stage;
  */
 
 public class LoginWindow {
+	Stage stage;
 	
 	/** Description. */
 	public LoginWindow() throws Exception {
 		// window properties
-		Stage stage = new Stage();
+		stage = new Stage();
 		stage.setTitle("StudyCompanion");
 		stage.setResizable(false);
 		
@@ -57,14 +58,14 @@ public class LoginWindow {
 			if (loginButton.getText() == "Login") {
 				// login as the selected user
 				login(usersCombo.getValue());
-				stage.close();
+				usersCombo.getSelectionModel().clearSelection();
 			} else {
 				// register a new user
 				Optional<String> username = registerUser();
 				if (username.isPresent()) {
 					System.out.println("username: \"" + username.get() + "\"");
 					login(username.get());
-					stage.close();
+					usersCombo.getSelectionModel().clearSelection();
 				} else {
 					System.out.println("cancelled");
 				}
@@ -79,7 +80,8 @@ public class LoginWindow {
 	}
 	
 	public void login(String username) {
-		PrimaryWindow primaryWindow = new PrimaryWindow(username);
+		PrimaryWindow primaryWindow = new PrimaryWindow(username, stage);
+		stage.hide();
 	}
 	
 	public Optional<String> registerUser() {

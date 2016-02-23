@@ -26,11 +26,13 @@ import javafx.stage.Stage;
  */
 
 public class PrimaryWindow {
+	Stage stage, parentStage;
 
 	/** Description. */
-	public PrimaryWindow(String username) {
+	public PrimaryWindow(String username, Stage parentStage) {
+		this.parentStage = parentStage;
 		// window properties
-		Stage stage = new Stage();
+		stage = new Stage();
 		stage.setTitle("StudyCompanion");
 		stage.setMinWidth(600);
 		stage.setMinHeight(450);
@@ -91,6 +93,7 @@ public class PrimaryWindow {
 		exitButton.setPrefWidth(80);
 		exitButton.setOnAction(event -> {
 			stage.close();
+			parentStage.show();
 		});
 		GridPane.setConstraints(exitButton, 0, 4, 1, 1, HPos.CENTER, VPos.TOP, Priority.NEVER, Priority.ALWAYS);
 		
@@ -143,18 +146,8 @@ public class PrimaryWindow {
 		deleteButton.disableProperty().bind(studySetsList.getSelectionModel().selectedItemProperty().isNull());
 		deleteButton.setOnAction(event -> {
 			StudySet selectedStudySet = studySetsList.getSelectionModel().getSelectedItem();
-			Dialog<ButtonType> deleteWindow = new Dialog<ButtonType>();
-			deleteWindow.setTitle("Delete a StudySet");
-			//deleteWindow.setContentText("Are you sure you want to delete the StudySet " + selectedStudySet.getName() + "?");
-			Label contentText = new Label("Are you sure you want to delete the StudySet " + selectedStudySet.getName() + "?");
-			HBox deleteLayout = new HBox(contentText);
-			deleteLayout.setPadding(new Insets(10, 10, 10, 10));
-			ButtonType delete = new ButtonType("Delete", ButtonData.YES);
-			ButtonType cancel = new ButtonType("Cancel", ButtonData.CANCEL_CLOSE);
-			deleteWindow.getDialogPane().setContent(deleteLayout);
-			deleteWindow.getDialogPane().getButtonTypes().addAll(delete, cancel);
-			Optional<ButtonType> result = deleteWindow.showAndWait();
-			if (result.get() == delete) {
+			Optional<Boolean> confirmDeletion = deleteStudySet(selectedStudySet);
+			if (confirmDeletion.isPresent() && confirmDeletion.get() == true) {
 				studySetsCells.remove(selectedStudySet);
 			} else {
 				System.out.println("cancelled");
@@ -170,7 +163,8 @@ public class PrimaryWindow {
 	}
 	
 	public void openStudySet(StudySet studySet) {
-		StudySetWindow studySetWindow = new StudySetWindow(studySet);
+		StudySetWindow studySetWindow = new StudySetWindow(studySet, stage);
+		stage.hide();
 	}
 	
 	public Optional<String> editStudySet(StudySet studySet) {
@@ -181,6 +175,7 @@ public class PrimaryWindow {
 		layout.setPadding(new Insets(10, 10, 10, 10));
 		HBox.setHgrow(studySetText, Priority.ALWAYS);
 		editWindow.getDialogPane().setContent(layout);
+		
 		ButtonType editButton = new ButtonType("Edit", ButtonData.YES);
 		ButtonType cancelButton = new ButtonType("Cancel", ButtonData.CANCEL_CLOSE);
 		editWindow.getDialogPane().getButtonTypes().addAll(editButton, cancelButton);
@@ -191,5 +186,26 @@ public class PrimaryWindow {
 			return null;
 		});
 		return editWindow.showAndWait();
+	}
+	
+	public Optional<Boolean> deleteStudySet(StudySet studySet) {
+		Dialog<Boolean> deleteWindow = new Dialog<Boolean>();
+		deleteWindow.setTitle("Delete a StudySet");
+		Label contentLabel = new Label("Are you sure you want to delete the StudySet " + studySet.getName() + "?");
+		HBox layout = new HBox(contentLabel);
+		layout.setPadding(new Insets(10, 10, 10, 10));
+		HBox.setHgrow(contentLabel, Priority.ALWAYS);
+		deleteWindow.getDialogPane().setContent(layout);
+		
+		ButtonType deleteButton = new ButtonType("Delete", ButtonData.YES);
+		ButtonType cancelButton = new ButtonType("Cancel", ButtonData.CANCEL_CLOSE);
+		deleteWindow.getDialogPane().getButtonTypes().addAll(deleteButton, cancelButton);
+		deleteWindow.setResultConverter(result -> {
+			if (result == deleteButton) {
+				return true;
+			}
+			return null;
+		});
+		return deleteWindow.showAndWait();
 	}
 }

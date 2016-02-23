@@ -4,6 +4,8 @@ import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.geometry.VPos;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
@@ -13,10 +15,12 @@ import javafx.scene.layout.Priority;
 import javafx.stage.Stage;
 
 public class StudySetWindow {
+	Stage stage, parentStage;
 
-	public StudySetWindow(StudySet studySet) {
+	public StudySetWindow(StudySet studySet, Stage parentStage) {
+		this.parentStage = parentStage;
 		// window properties
-		Stage stage = new Stage();
+		stage = new Stage();
 		stage.setTitle("StudyCompanion");
 		stage.setMinWidth(600);
 		stage.setMinHeight(450);
@@ -53,7 +57,7 @@ public class StudySetWindow {
 		closeButton.setPrefWidth(80);
 		closeButton.setOnAction(event -> {
 			stage.close();
-			// re-open previous window
+			parentStage.show();
 		});
 		GridPane.setConstraints(closeButton, 0, 0);
 		
@@ -63,6 +67,17 @@ public class StudySetWindow {
 		
 		// statistics button
 		statisticsButton.setPrefWidth(80);
+		statisticsButton.disableProperty().bind(studyMaterialsList.getSelectionModel().selectedItemProperty().isNull());
+		statisticsButton.setOnAction(event -> {
+			Quiz selectedQuiz = (Quiz) studyMaterialsList.getSelectionModel().getSelectedItem();
+			Alert statisticsWindow = new Alert(AlertType.INFORMATION);
+			String stats = "";
+			for (QuizStat q : selectedQuiz.getStats()) {
+				stats += "score: " + q.getScore() + " | date: " + q.getDate() + "\n";
+			}
+			statisticsWindow.setContentText(stats);
+			statisticsWindow.showAndWait();
+		});
 		GridPane.setConstraints(statisticsButton, 3, 0);
 		
 		// StudyMaterials list
@@ -81,15 +96,7 @@ public class StudySetWindow {
 		openButton.disableProperty().bind(studyMaterialsList.getSelectionModel().selectedItemProperty().isNull());
 		openButton.setOnAction(event -> {
 			Object selectedStudyMaterial = studyMaterialsList.getSelectionModel().getSelectedItem();
-			if (selectedStudyMaterial.getClass().equals(Deck.class)) {
-				DeckWindow deckWindow = new DeckWindow((Deck) selectedStudyMaterial);
-				stage.close();
-			} else if (selectedStudyMaterial.getClass().equals(Quiz.class)) {
-				QuizWindow quizWindow = new QuizWindow((Quiz) selectedStudyMaterial);
-				stage.close();
-			} else {
-				System.out.println("unidentified object");
-			}
+			openStudyMaterial(selectedStudyMaterial);
 		});
 		GridPane.setConstraints(openButton, 1, 2, 1, 1, HPos.RIGHT, VPos.CENTER, Priority.ALWAYS, Priority.NEVER);
 		
@@ -97,7 +104,7 @@ public class StudySetWindow {
 		editButton.setPrefWidth(80);
 		editButton.disableProperty().bind(studyMaterialsList.getSelectionModel().selectedItemProperty().isNull());
 		editButton.setOnAction(event -> {
-			
+			// edit
 		});
 		GridPane.setConstraints(editButton, 2, 2);
 		
@@ -105,7 +112,7 @@ public class StudySetWindow {
 		deleteButton.setPrefWidth(80);
 		deleteButton.disableProperty().bind(studyMaterialsList.getSelectionModel().selectedItemProperty().isNull());
 		deleteButton.setOnAction(event -> {
-			
+			// delete
 		});
 		GridPane.setConstraints(deleteButton, 3, 2);
 		
@@ -114,5 +121,17 @@ public class StudySetWindow {
 		stage.setScene(scene);
 		stage.sizeToScene();
 		stage.show();
+	}
+	
+	public void openStudyMaterial(Object studyMaterial) {
+		if (studyMaterial.getClass().equals(Deck.class)) {
+			//DeckWindow deckWindow = new DeckWindow((Deck) selectedStudyMaterial);
+			//stage.close();
+		} else if (studyMaterial.getClass().equals(Quiz.class)) {
+			QuizWindow quizWindow = new QuizWindow((Quiz) studyMaterial, stage);
+			stage.close();
+		} else {
+			System.out.println("unidentified object");
+		}
 	}
 }

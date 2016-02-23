@@ -16,12 +16,10 @@ public class Main extends Application {
 	
 	/** Starting point of the application. */
 	public static void main(String[] args) {
-		// sample data
+		// build sample data
 		sampleUsers = Arrays.asList("Richie", "Jack", "Honglu", "Jack", "Hedong");
-
 		
 		StudySet math111 = new StudySet("MATH 111");
-		sampleStudySets.add(math111);
 		Quiz finalexam = new Quiz("Final exam");
 		Question f1 = new Question("tf", "1 + 1 = 2", "True");
 		finalexam.addQuestion(f1);
@@ -34,6 +32,7 @@ public class Main extends Application {
 		f3.addWrongAnswer("2");
 		finalexam.addQuestion(f3);
 		math111.addQuiz(finalexam);
+		sampleStudySets.add(math111);
 		
 		StudySet cis422 = new StudySet("CIS 422");
 		Deck chap1 = new Deck("Chapter 1");
@@ -65,7 +64,6 @@ public class Main extends Application {
 	public void start(Stage stage) {
 		try {
 			LoginWindow loginWindow = new LoginWindow();
-			//PrimaryWindow primaryWindow = new PrimaryWindow("tester");
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
