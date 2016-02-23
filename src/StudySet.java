@@ -1,5 +1,6 @@
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 public class StudySet {
@@ -21,7 +22,14 @@ public class StudySet {
 		this("");
 	}
 	
-	//clone go here
+	public StudySet clone() {
+		return new StudySet(this.name, this.quizzes, this.decks);
+	}
+	
+	@Override
+	public String toString() {
+		return name;
+	}
 	
 	//setters
 	public void setName(String name){

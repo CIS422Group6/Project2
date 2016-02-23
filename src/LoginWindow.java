@@ -1,5 +1,6 @@
 import java.util.Optional;
 
+import javafx.beans.binding.Bindings;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
@@ -10,9 +11,8 @@ import javafx.scene.control.ButtonType;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.TextField;
-import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.Priority;
 import javafx.stage.Stage;
 
 /**
@@ -23,83 +23,85 @@ public class LoginWindow {
 	
 	/** Description. */
 	public LoginWindow() throws Exception {
+		// window properties
 		Stage stage = new Stage();
-		stage.setTitle("StudyCompanion v0.1");
+		stage.setTitle("StudyCompanion");
 		stage.setResizable(false);
 		
+		// layout manager
 		HBox layout = new HBox();
 		layout.setSpacing(20);
 		layout.setPadding(new Insets(10, 10, 10, 10));
+		Scene scene = new Scene(layout);
 		
-		// list of user account
-		ObservableList<String> users = FXCollections.observableArrayList("Richie", "Jack", "Honglu", "Jack", "Hedong", "Create a new user...");
-		// declare GUI components
-		ComboBox<String> userSelection = new ComboBox<String>(users);
-		Button login = new Button("Login");
+		// Users list
+		ObservableList<String> users = FXCollections.observableArrayList(Main.sampleUsers);
+		users.add("Create a new user...");
+		
+		// GUI components
+		ComboBox<String> usersCombo = new ComboBox<String>(users);
+		Button loginButton = new Button("Login");
 
-		// user selection
-		userSelection.setPrefWidth(180);
-		userSelection.setVisibleRowCount(10);
-		userSelection.valueProperty().addListener((change, oldV, newV) -> {
-			login.setDisable(false);
-			if (newV == "Create a new user...") {
-				login.setText("Create");
-			} else {
-				login.setText("Login");
-			}
-		});
+		// Users selection ComboBox
+		usersCombo.setPrefWidth(180);
+		usersCombo.setVisibleRowCount(10);
+		usersCombo.setPromptText("Select a user");
+		//userSelection.valueProperty().addListener((change, oldV, newV) -> System.out.println(userSelection.getSelectionModel().isEmpty()));
 
 		// login button
-		login.setPrefWidth(80);
-		login.setDisable(true);
-		login.setOnAction(event -> {
-			if (login.getText() == "Login") {
-				// login as user
-				login(userSelection.getSelectionModel().getSelectedItem());
+		loginButton.setPrefWidth(80);
+		loginButton.disableProperty().bind(usersCombo.valueProperty().isNull());
+		loginButton.textProperty().bind(Bindings.when(usersCombo.valueProperty().isEqualTo("Create a new user..."))
+				.then("Create").otherwise("Login"));
+		loginButton.setOnAction(event -> {
+			if (loginButton.getText() == "Login") {
+				// login as the selected user
+				login(usersCombo.getValue());
 				stage.close();
 			} else {
 				// register a new user
-				registerUser();
+				Optional<String> username = registerUser();
+				if (username.isPresent()) {
+					System.out.println("username: \"" + username.get() + "\"");
+					login(username.get());
+					stage.close();
+				} else {
+					System.out.println("cancelled");
+				}
 			}
 		});
 		
-		layout.getChildren().addAll(userSelection, login);
-
-		Scene scene = new Scene(layout);
+		// build and display the window
+		layout.getChildren().addAll(usersCombo, loginButton);
 		stage.setScene(scene);
 		stage.sizeToScene();
 		stage.show();
 	}
 	
 	public void login(String username) {
-		PrimaryWindow window = new PrimaryWindow(username);
+		PrimaryWindow primaryWindow = new PrimaryWindow(username);
 	}
 	
-	public void registerUser() {
+	public Optional<String> registerUser() {
 		Dialog<String> registerWindow = new Dialog<String>();
 		registerWindow.setTitle("Create user");
-		//register.setHeaderText("text");
-		//register.setContentText("text");
-		VBox layout = new VBox();
+		HBox layout = new HBox();
 		layout.setPadding(new Insets(10, 10, 10, 10));
-		TextField username = new TextField();
-		layout.getChildren().add(username);
-		GridPane.setFillWidth(username, true);
+		TextField userText = new TextField();
+		HBox.setHgrow(userText, Priority.ALWAYS);
+		layout.getChildren().add(userText);
 		registerWindow.getDialogPane().setContent(layout);
-		ButtonType create = new ButtonType("Create", ButtonData.APPLY);
-		ButtonType cancel = new ButtonType("Cancel", ButtonData.CANCEL_CLOSE);
+		
+		ButtonType createButton = new ButtonType("Create", ButtonData.APPLY);
+		ButtonType cancelButton = new ButtonType("Cancel", ButtonData.CANCEL_CLOSE);
 		registerWindow.setResultConverter(result -> {
-			if (result == create) {
-				return username.getText();
+			if (result == createButton) {
+				return userText.getText();
 			}
 			return null;
 		});
-		registerWindow.getDialogPane().getButtonTypes().addAll(create, cancel);
-		Optional<String> user = registerWindow.showAndWait();
-		if (user.isPresent()) {
-			System.out.println("username: \"" + user.get() + "\"");
-		} else {
-			System.out.println("cancelled");
-		}
+		registerWindow.getDialogPane().getButtonTypes().addAll(createButton, cancelButton);
+		
+		return registerWindow.showAndWait();
 	}
 }

@@ -24,6 +24,10 @@ public class Deck {
 	
 	//clone will go gere
 	
+	@Override
+	public String toString() {
+		return name + "\t(Deck, " + cards.size() + " cards)";
+	}
 	
 	//setters
 	public void setName(String name){

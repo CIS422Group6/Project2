@@ -24,6 +24,11 @@ public class Quiz {
 	
 	//clone function will go here
 	
+	@Override
+	public String toString() {
+		return name + "\t(Quiz, " + questions.size() + " questions)";
+	}
+	
 	//setters
 	public void setName(String name){
 		if(name == null){

@@ -11,7 +11,7 @@ public class DeckWindow {
 	public DeckWindow(Deck deck) {
 		Stage stage = new Stage();
 		stage.setTitle("StudyCompanion v0.1");
-		stage.setResizable(false);
+		stage.setResizable(true);
 		
 		GridPane layout = new GridPane();
 		layout.setHgap(20);
@@ -21,9 +21,9 @@ public class DeckWindow {
 		Label question = new Label();
 		Label answer = new Label();
 		
-		question.setText(deck.getCards().get(currentQuestion).getQuestion());
+		question.setText("Question: " + deck.getCards().get(currentQuestion).getQuestion());
 		layout.add(question, 0, 0);
-		answer.setText(deck.getCards().get(currentQuestion).getAnswer());
+		answer.setText("Answer: " + deck.getCards().get(currentQuestion).getAnswer());
 		layout.add(answer, 0, 1);
 		
 		Button next = new Button("Next");
