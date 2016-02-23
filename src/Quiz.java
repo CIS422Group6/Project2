@@ -1,15 +1,16 @@
-
 import java.util.ArrayList;
 import java.util.List;
 
 public class Quiz {
 	private String name;
 	private List<Question> questions;
+	private List<QuizStat> stats;
 	
 	//fully explicit constructor
 	public Quiz(String name, List<Question> questions){
 		setName(name);
 		this.questions = new ArrayList<Question>(questions);
+		this.stats = new ArrayList<QuizStat>();
 	}
 	
 	//half explicit constructor, only defining name
@@ -37,6 +38,10 @@ public class Quiz {
 		questions.add(question);
 	}
 	
+	public void addStat(QuizStat stat){
+		this.stats.add(stat);
+	}
+	
 	//getters
 	public String getName(){
 		return name;
@@ -45,6 +50,12 @@ public class Quiz {
 	public List<Question> getQuestions(){
 		return questions;
 	}
+	
+	public List<QuizStat> getStats(){
+		return stats;
+	}
+	
+	
 	
 	
 }
