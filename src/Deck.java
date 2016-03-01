@@ -3,13 +3,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Deck {
-	private String name;
+	private String name, sessionDate;
 	private List<Card> cards;
 	
 	//fully explicit constructor
 	public Deck(String name, List<Card> cards){
 		setName(name);
 		this.cards = new ArrayList<Card>(cards);
+		sessionDate = "2016/01/15";
 	}
 	
 	//half explicit constructor, only defines a name
@@ -42,6 +43,14 @@ public class Deck {
 		cards.add(card);
 	}
 	
+	public void setDate(String date){
+		if(date == null){
+			sessionDate = "";
+		}else{
+			sessionDate = date;
+		}
+	}
+	
 	//getters
 	public String getName(){
 		return name;
@@ -49,6 +58,10 @@ public class Deck {
 	
 	public List<Card> getCards(){
 		return cards;
+	}
+	
+	public String getDate(){
+		return sessionDate;
 	}
 
 }
