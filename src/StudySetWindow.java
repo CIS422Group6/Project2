@@ -18,8 +18,8 @@ public class StudySetWindow {
 	Stage stage, parentStage;
 
 	public StudySetWindow(StudySet studySet, Stage parentStage) {
-		this.parentStage = parentStage;
 		// window properties
+		this.parentStage = parentStage;
 		stage = new Stage();
 		stage.setTitle("StudyCompanion");
 		stage.setMinWidth(600);
@@ -69,6 +69,7 @@ public class StudySetWindow {
 		statisticsButton.setPrefWidth(80);
 		statisticsButton.disableProperty().bind(studyMaterialsList.getSelectionModel().selectedItemProperty().isNull());
 		statisticsButton.setOnAction(event -> {
+			// TODO statistics button
 			Quiz selectedQuiz = (Quiz) studyMaterialsList.getSelectionModel().getSelectedItem();
 			Alert statisticsWindow = new Alert(AlertType.INFORMATION);
 			String stats = "";
@@ -84,9 +85,10 @@ public class StudySetWindow {
 		GridPane.setConstraints(studyMaterialsList, 0, 1, 4, 1, HPos.CENTER, VPos.CENTER, Priority.ALWAYS, Priority.ALWAYS);
 		
 		// add button
-		addButton.setPrefWidth(100);
+		addButton.setPrefWidth(80);
 		addButton.setPromptText("Add...");
 		addButton.valueProperty().addListener((event, oldValue, newValue) -> {
+			// TODO add deck/quiz button
 			System.out.println(newValue);
 		});
 		GridPane.setConstraints(addButton, 0, 2);
@@ -95,6 +97,7 @@ public class StudySetWindow {
 		openButton.setPrefWidth(80);
 		openButton.disableProperty().bind(studyMaterialsList.getSelectionModel().selectedItemProperty().isNull());
 		openButton.setOnAction(event -> {
+			//TODO open deck/quiz button
 			Object selectedStudyMaterial = studyMaterialsList.getSelectionModel().getSelectedItem();
 			openStudyMaterial(selectedStudyMaterial);
 		});
@@ -104,7 +107,9 @@ public class StudySetWindow {
 		editButton.setPrefWidth(80);
 		editButton.disableProperty().bind(studyMaterialsList.getSelectionModel().selectedItemProperty().isNull());
 		editButton.setOnAction(event -> {
-			// edit
+			// TODO edit deck/quiz button
+			Object selectedStudyMaterial = studyMaterialsList.getSelectionModel().getSelectedItem();
+			editStudyMaterial(selectedStudyMaterial);
 		});
 		GridPane.setConstraints(editButton, 2, 2);
 		
@@ -112,7 +117,7 @@ public class StudySetWindow {
 		deleteButton.setPrefWidth(80);
 		deleteButton.disableProperty().bind(studyMaterialsList.getSelectionModel().selectedItemProperty().isNull());
 		deleteButton.setOnAction(event -> {
-			// delete
+			// TODO delete deck/quiz button
 		});
 		GridPane.setConstraints(deleteButton, 3, 2);
 		
@@ -125,13 +130,25 @@ public class StudySetWindow {
 	
 	public void openStudyMaterial(Object studyMaterial) {
 		if (studyMaterial.getClass().equals(Deck.class)) {
-			//DeckWindow deckWindow = new DeckWindow((Deck) selectedStudyMaterial);
-			//stage.close();
+			DeckWindow deckWindow = new DeckWindow((Deck) studyMaterial, stage);
+			stage.close();
 		} else if (studyMaterial.getClass().equals(Quiz.class)) {
 			QuizWindow quizWindow = new QuizWindow((Quiz) studyMaterial, stage);
 			stage.close();
 		} else {
-			System.out.println("unidentified object");
+			//System.out.println("unidentified object");
+		}
+	}
+	
+	public void editStudyMaterial(Object studyMaterial) {
+		if (studyMaterial.getClass().equals(Deck.class)) {
+			//DeckWindow deckWindow = new DeckWindow((Deck) studyMaterial, stage);
+			//stage.close();
+		} else if (studyMaterial.getClass().equals(Quiz.class)) {
+			QuizEditWindow quizEditWindow = new QuizEditWindow((Quiz) studyMaterial, stage);
+			stage.close();
+		} else {
+			//System.out.println("unidentified object");
 		}
 	}
 }

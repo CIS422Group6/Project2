@@ -1,4 +1,3 @@
-import java.util.Calendar;
 import java.util.Date;
 import java.util.Optional;
 
@@ -30,8 +29,8 @@ public class QuizWindow {
 	int a;
 	
 	public QuizWindow(Quiz quiz, Stage parentStage) {
-		this.parentStage = parentStage;
 		// window properties
+		this.parentStage = parentStage;
 		stage = new Stage();
 		stage.setTitle("StudyCompanion");
 		stage.setMinWidth(600);
@@ -116,7 +115,7 @@ public class QuizWindow {
 		});
 		GridPane.setConstraints(questionsCells, 0, 0, 1, 1, HPos.CENTER, VPos.CENTER, Priority.ALWAYS, Priority.ALWAYS);
 		
-		// close button
+		// finish button
 		finishButton.setPrefWidth(80);
 		finishButton.setOnAction(event -> {
 			// check if all questions are answered
@@ -137,9 +136,7 @@ public class QuizWindow {
 						score++;
 					}
 				}
-				Date date = new Date();
-				// TODO replace Date with Calendar
-				quiz.addStat(new QuizStat(score, date.getYear() + "/" + date.getMonth() + "/" + date.getDay()));
+				quiz.addStat(new QuizStat(score));
 				Alert scoreWindow = new Alert(AlertType.INFORMATION);
 				scoreWindow.setTitle("Final score");
 				scoreWindow.setContentText("Score: " + score + " out of " + quiz.getQuestions().size());
@@ -150,7 +147,7 @@ public class QuizWindow {
 		});
 		GridPane.setConstraints(finishButton, 0, 1, 1, 1, HPos.CENTER, VPos.CENTER);
 		
-		// build and display window
+		// build and display the window
 		layout.getChildren().addAll(questionsCells, finishButton);
 		stage.setScene(scene);
 		stage.sizeToScene();

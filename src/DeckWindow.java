@@ -16,8 +16,8 @@ public class DeckWindow {
 	int currentQuestion = 0;
 	Stage stage, parentStage;
 	
-	public DeckWindow(Deck deck, Stage pStage) {
-		parentStage = pStage;
+	public DeckWindow(Deck deck, Stage parentStage) {
+		this.parentStage = parentStage;
 		stage = new Stage();
 		stage.setTitle("StudyCompanion v0.1");
 		stage.setResizable(true);

@@ -62,11 +62,6 @@ public class Main extends Application {
 	/** Overriding the default start() behavior. */
 	@Override
 	public void start(Stage stage) {
-		try {
-			LoginWindow loginWindow = new LoginWindow();
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		LoginWindow loginWindow = new LoginWindow();
 	}
 }

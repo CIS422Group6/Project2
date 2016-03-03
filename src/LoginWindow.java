@@ -23,7 +23,7 @@ public class LoginWindow {
 	Stage stage;
 	
 	/** Description. */
-	public LoginWindow() throws Exception {
+	public LoginWindow() {
 		// window properties
 		stage = new Stage();
 		stage.setTitle("StudyCompanion");

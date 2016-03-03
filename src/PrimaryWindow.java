@@ -30,8 +30,8 @@ public class PrimaryWindow {
 
 	/** Description. */
 	public PrimaryWindow(String username, Stage parentStage) {
-		this.parentStage = parentStage;
 		// window properties
+		this.parentStage = parentStage;
 		stage = new Stage();
 		stage.setTitle("StudyCompanion");
 		stage.setMinWidth(600);
@@ -78,20 +78,14 @@ public class PrimaryWindow {
 		// settings button
 		settingsButton.setPrefWidth(80);
 		settingsButton.setOnAction(event -> {
-			// print GUI sizes for now
-			System.out.println(openButton.getHeight());
-			System.out.println("sslabel w/h: " + studySetsLabel.getWidth() + "/" + studySetsLabel.getHeight());
-			System.out.println("pane w/h: " + space1.getWidth() + "/" + space1.getHeight());
-			System.out.println("list w/h: " + studySetsList.getWidth() + "/" + studySetsList.getHeight());
-			System.out.println("stage w/h: " + stage.getWidth() + "/" + stage.getHeight());
-			System.out.println("scene w/h: " + scene.getWidth() + "/" + scene.getHeight());
-			System.out.println("layout w/h: " + layout.getWidth() + "/" + layout.getHeight() + "\n");
+			// TODO settings button
 		});
 		GridPane.setConstraints(settingsButton, 0, 3, 1, 1, HPos.CENTER, VPos.TOP);
 
 		// exit button
 		exitButton.setPrefWidth(80);
 		exitButton.setOnAction(event -> {
+			// TODO exit/logout button
 			stage.close();
 			parentStage.show();
 		});
@@ -113,6 +107,7 @@ public class PrimaryWindow {
 			if (studySetName.isPresent()) {
 				newStudySet.setName(studySetName.get());
 				studySetsCells.add(newStudySet);
+				openStudySet(newStudySet);
 			}
 		});
 		GridPane.setConstraints(addButton, 1, 5, 1, 1, HPos.LEFT, VPos.TOP);
@@ -169,13 +164,16 @@ public class PrimaryWindow {
 	
 	public Optional<String> editStudySet(StudySet studySet) {
 		Dialog<String> editWindow = new Dialog<String>();
-		editWindow.setTitle("Add or Edit a StudySet");
+		if (studySet.getName() == "") {
+			editWindow.setTitle("Add a new StudySet");
+		} else {
+			editWindow.setTitle("Edit a StudySet");
+		}
 		TextField studySetText = new TextField(studySet.getName());
 		HBox layout = new HBox(studySetText);
 		layout.setPadding(new Insets(10, 10, 10, 10));
 		HBox.setHgrow(studySetText, Priority.ALWAYS);
 		editWindow.getDialogPane().setContent(layout);
-		
 		ButtonType editButton = new ButtonType("Edit", ButtonData.YES);
 		ButtonType cancelButton = new ButtonType("Cancel", ButtonData.CANCEL_CLOSE);
 		editWindow.getDialogPane().getButtonTypes().addAll(editButton, cancelButton);
@@ -196,7 +194,6 @@ public class PrimaryWindow {
 		layout.setPadding(new Insets(10, 10, 10, 10));
 		HBox.setHgrow(contentLabel, Priority.ALWAYS);
 		deleteWindow.getDialogPane().setContent(layout);
-		
 		ButtonType deleteButton = new ButtonType("Delete", ButtonData.YES);
 		ButtonType cancelButton = new ButtonType("Cancel", ButtonData.CANCEL_CLOSE);
 		deleteWindow.getDialogPane().getButtonTypes().addAll(deleteButton, cancelButton);

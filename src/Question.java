@@ -22,6 +22,16 @@ public class Question {
 	
 	//clone function will go here soon
 	
+	public String toString() {
+		if (type == "tf") {
+			return question + " (T/F)";
+		} else if (type == "mc") {
+			return question + " (MC, " + (wrongAnswers.size() + 1) + " choices)";
+		} else {
+			return "";
+		}
+	}
+	
 	//setters
 	public void setType(String type){
 		if(type == null){
@@ -48,6 +58,9 @@ public class Question {
 	}
 	public void addWrongAnswer(String answer){
 		wrongAnswers.add(answer);
+	}
+	public void clearWrongAnswers() {
+		wrongAnswers.clear();
 	}
 	
 	//getters
