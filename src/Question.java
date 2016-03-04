@@ -79,5 +79,12 @@ public class Question {
 	public List<String> getWrongAnswers(){
 		return new ArrayList<String>(wrongAnswers);
 	}
-	
+	//checks if a given string (intended to be user input) is the same as correct answer, white space removed
+	public boolean compareAnswer(String response){
+		if(response.replaceAll("\\s", "").equals(rightAnswer.replaceAll("\\s", ""))){
+			return true;
+		}else{
+			return false;
+		}
+	}
 }
