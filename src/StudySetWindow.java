@@ -1,3 +1,5 @@
+import java.io.File;
+
 import java.util.Optional;
 
 import javafx.collections.FXCollections;
@@ -19,6 +21,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
+import javafx.stage.FileChooser;
 
 public class StudySetWindow {
 	ObservableList<Object> studyMaterialsCells;
@@ -142,11 +145,32 @@ public class StudySetWindow {
 		HBox.setHgrow(studyMaterialText, Priority.ALWAYS);
 		addDialog.getDialogPane().setContent(layout);
 		ButtonType addButton = new ButtonType("Add", ButtonData.YES);
+		ButtonType importButton = new ButtonType("Import", ButtonData.LEFT);
 		ButtonType cancelButton = new ButtonType("Cancel", ButtonData.CANCEL_CLOSE);
-		addDialog.getDialogPane().getButtonTypes().addAll(addButton, cancelButton);
+		addDialog.getDialogPane().getButtonTypes().addAll(addButton, importButton, cancelButton);
 		addDialog.setResultConverter(result -> {
 			if (result == addButton) {
 				return studyMaterialText.getText();
+			} else if (result == importButton) {
+				FileChooser importWindow = new FileChooser();
+				FileChooser.ExtensionFilter xml = new FileChooser.ExtensionFilter("eXtensibleMarkup Language file", "*.xml");
+				File file = null;
+				importWindow.getExtensionFilters().add(xml);
+				file = importWindow.showOpenDialog(Main.stage);
+				if (file != null) {
+					if (type.equals("Add Deck")) {
+						Deck newDeck = new Deck();
+						newDeck.deckImport(file.getPath());
+						studyMaterialsCells.add(newDeck);
+						editStudyMaterial(newDeck);
+					} else if (type.equals("Add Quiz")) {
+						Quiz newQuiz = new Quiz();
+						newQuiz.quizImport(file.getPath());
+						studyMaterialsCells.add(newQuiz);
+						editStudyMaterial(newQuiz);
+					}
+				}
+				return null;
 			}
 			return null;
 		});
@@ -200,11 +224,28 @@ public class StudySetWindow {
 		HBox.setHgrow(contentLabel, Priority.ALWAYS);
 		deleteDialog.getDialogPane().setContent(layout);
 		ButtonType deleteButton = new ButtonType("Delete", ButtonData.YES);
+		ButtonType exportButton = new ButtonType("Export", ButtonData.LEFT);
 		ButtonType cancelButton = new ButtonType("Cancel", ButtonData.CANCEL_CLOSE);
-		deleteDialog.getDialogPane().getButtonTypes().addAll(deleteButton, cancelButton);
+		deleteDialog.getDialogPane().getButtonTypes().addAll(deleteButton, exportButton, cancelButton);
 		deleteDialog.setResultConverter(result -> {
 			if (result == deleteButton) {
 				return true;
+			} else if (result == exportButton) {
+				FileChooser exportWindow = new FileChooser();
+				FileChooser.ExtensionFilter xml = new FileChooser.ExtensionFilter("eXtensibleMarkup Language file", "*.xml");
+				File file = null;
+				exportWindow.getExtensionFilters().add(xml);
+				file = exportWindow.showSaveDialog(Main.stage);
+				if (file != null) {
+					if (studyMaterial.getClass().equals(Deck.class)) {
+						Deck exportDeck = (Deck) studyMaterial;
+						exportDeck.export(file.getPath());
+					} else if (studyMaterial.getClass().equals(Quiz.class)) {
+						Quiz exportQuiz = (Quiz) studyMaterial;
+						exportQuiz.export(file.getPath());
+					}
+				}
+				return null;
 			}
 			return null;
 		});

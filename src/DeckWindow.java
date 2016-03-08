@@ -36,8 +36,6 @@ public class DeckWindow {
 		
 		LinkedList<Card> cards = new LinkedList<Card>();
 		
-	
-		
 		if(cards.peek()==null){
 			finish();
 		}

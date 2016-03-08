@@ -7,7 +7,7 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 
 /**
- * The main class for the application.
+ * The main class for data and window management.
  */
 
 public class Main extends Application {
@@ -18,7 +18,7 @@ public class Main extends Application {
 	// list of StudySets
 	public static ObservableList<StudySet> loadedStudySets;
 	
-	/** Starting point of the application. */
+	/** Initialize the data (StudySets) and window. */
 	public static void main(String[] args) {
 		// load the StudySets
 		loadedStudySets = FXCollections.observableArrayList(StudySet.loadAll());
@@ -41,6 +41,7 @@ public class Main extends Application {
 		PrimaryWindow window = new PrimaryWindow();
 	}
 	
+	/** Update the scene. */
 	public static void setScene(Scene scene) {
 		scenes.add(scene);
 		stage.setScene(scene);
