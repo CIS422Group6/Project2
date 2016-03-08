@@ -17,6 +17,19 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import java.io.File;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+
 public class StudySet {
 	private String name, path;
 	private List<Quiz> quizzes;
@@ -233,7 +246,7 @@ public class StudySet {
 				if(quizNode.getNodeType() == Node.ELEMENT_NODE){
 					Element quizEle = (Element) quizNode;
 					Quiz quiz = new Quiz(quizEle.getElementsByTagName("name").item(0).getTextContent());
-					System.out.println(quizEle.getElementsByTagName("name").item(0).getTextContent());
+					//System.out.println(quizEle.getElementsByTagName("name").item(0).getTextContent());
 					NodeList questionList = quizEle.getElementsByTagName("question");
 					
 					for(int j = 0; j < questionList.getLength();j++){
@@ -306,7 +319,7 @@ public class StudySet {
 
 		
 	}
-	
+
 	public static List<StudySet> loadAll() {
 		List<StudySet> studySets = new ArrayList<StudySet>();
 		File folder = new File(".");
@@ -325,6 +338,4 @@ public class StudySet {
 		}
 		return studySets;
 	}
-	
-	
 }
