@@ -81,7 +81,7 @@ public class Question {
 	}
 	//checks if a given string (intended to be user input) is the same as correct answer, white space removed
 	public boolean compareAnswer(String response){
-		if(response.replaceAll("\\s", "").equals(rightAnswer.replaceAll("\\s", ""))){
+		if(response.replaceAll("\\s", "").toLowerCase().equals(rightAnswer.replaceAll("\\s", "").toLowerCase())){
 			return true;
 		}else{
 			return false;

@@ -231,7 +231,7 @@ public class StudySet {
 				if(quizNode.getNodeType() == Node.ELEMENT_NODE){
 					Element quizEle = (Element) quizNode;
 					Quiz quiz = new Quiz(quizEle.getElementsByTagName("name").item(0).getTextContent());
-					System.out.println(quizEle.getElementsByTagName("name").item(0).getTextContent());
+					//System.out.println(quizEle.getElementsByTagName("name").item(0).getTextContent());
 					NodeList questionList = quizEle.getElementsByTagName("question");
 					
 					for(int j = 0; j < questionList.getLength();j++){
