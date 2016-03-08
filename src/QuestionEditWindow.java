@@ -18,16 +18,8 @@ import javafx.scene.layout.Priority;
 import javafx.stage.Stage;
 
 public class QuestionEditWindow {
-	Stage stage, parentStage;
 
-	public QuestionEditWindow(Question question, Stage parentStage) {
-		this.parentStage = parentStage;
-		// window properties
-		stage = new Stage();
-		stage.setTitle("StudyCompanion");
-		stage.setMinWidth(600);
-		stage.setMinHeight(450);
-
+	public QuestionEditWindow(Question question) {
 		// layout manager
 		GridPane layout = new GridPane();
 		//layout.setGridLinesVisible(true);
@@ -114,8 +106,6 @@ public class QuestionEditWindow {
 					question.addWrongAnswer(wrongAnswer);
 				}
 			}
-			stage.close();
-			parentStage.show();
 		});
 		GridPane.setConstraints(saveButton, 0, 4);
 		
@@ -125,8 +115,6 @@ public class QuestionEditWindow {
 		
 		// create and display the window
 		layout.getChildren().addAll(questionLabel, questionText, questionTypeLabel, questionTypeCombo, answerLabel, answerText, wrongLabel, wrongList, saveButton, cancelButton);
-		stage.setScene(scene);
-		stage.sizeToScene();
-		stage.show();
+		Main.setScene(scene);
 	}
 }

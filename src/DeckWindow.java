@@ -14,14 +14,8 @@ import javafx.stage.Stage;
 
 public class DeckWindow {
 	int currentQuestion = 0;
-	Stage stage, parentStage;
 	
-	public DeckWindow(Deck deck, Stage parentStage) {
-		this.parentStage = parentStage;
-		stage = new Stage();
-		stage.setTitle("StudyCompanion v0.1");
-		stage.setResizable(true);
-		
+	public DeckWindow(Deck deck) {
 		GridPane layout = new GridPane();
 		layout.setHgap(20);
 		layout.setVgap(20);
@@ -114,9 +108,7 @@ public class DeckWindow {
 		
 		
 		Scene scene = new Scene(layout);
-		stage.setScene(scene);
-		stage.sizeToScene();
-		stage.show();
+		Main.stage.setScene(scene);
 	}
 	
 	public void finish(){
@@ -124,8 +116,6 @@ public class DeckWindow {
 		finWindow.setTitle("Complete!");
 		finWindow.setContentText("You've completed this deck for now!");
 		finWindow.showAndWait();
-		stage.close();
-		parentStage.show();
 	}
 	
 }

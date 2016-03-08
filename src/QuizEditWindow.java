@@ -19,16 +19,8 @@ import javafx.scene.layout.Priority;
 import javafx.stage.Stage;
 
 public class QuizEditWindow {
-	Stage stage, parentStage;
 	
-	public QuizEditWindow(Quiz quiz, Stage parentStage) {
-		// window properties
-		this.parentStage = parentStage;
-		stage = new Stage();
-		stage.setTitle("StudyCompanion");
-		stage.setMinWidth(600);
-		stage.setMinHeight(450);
-		
+	public QuizEditWindow(Quiz quiz) {
 		// layout manager
 		GridPane layout = new GridPane();
 		//layout.setGridLinesVisible(true);
@@ -52,8 +44,7 @@ public class QuizEditWindow {
 		// Close button
 		closeButton.setPrefWidth(80);
 		closeButton.setOnAction(event -> {
-			stage.close();
-			parentStage.show();
+			Main.closeScene();
 		});
 		GridPane.setConstraints(closeButton, 0, 0);
 		
@@ -102,14 +93,11 @@ public class QuizEditWindow {
 		GridPane.setConstraints(deleteButton, 2, 2);
 		
 		layout.getChildren().addAll(closeButton, quizLabel, questionsList, addButton, editButton, deleteButton);
-		stage.setScene(scene);
-		stage.sizeToScene();
-		stage.show();
+		Main.setScene(scene);
 	}
 	
 	public void editQuestion(Question question) {
-		QuestionEditWindow questionEditWindow = new QuestionEditWindow(question, stage);	
-		stage.hide();
+		QuestionEditWindow questionEditWindow = new QuestionEditWindow(question);
 	}
 	
 	public Optional<Boolean> deleteQuestion() {
