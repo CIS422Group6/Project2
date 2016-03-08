@@ -22,8 +22,6 @@ public class Main extends Application {
 	public static void main(String[] args) {
 		// load the StudySets
 		loadedStudySets = FXCollections.observableArrayList(StudySet.loadAll());
-		System.out.println("Loaded StudySets: " + loadedStudySets);
-		
 		// start the application
 		launch(args);
 	}
@@ -51,9 +49,16 @@ public class Main extends Application {
 	public static void closeScene() {
 		scenes.pop();
 		if (scenes.isEmpty()) {
+			saveStudySets();
 			stage.close();
 		} else {
 			stage.setScene(scenes.peek());
+		}
+	}
+	
+	public static void saveStudySets() {
+		for (StudySet studySet : loadedStudySets) {
+			studySet.save();
 		}
 	}
 }

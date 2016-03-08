@@ -21,18 +21,19 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 
 public class StudySetWindow {
+	ObservableList<Object> studyMaterialsCells;
 
 	public StudySetWindow(StudySet studySet) {
 		// layout manager
 		GridPane layout = new GridPane();
-		layout.setGridLinesVisible(true);
+		//layout.setGridLinesVisible(true);
 		layout.setHgap(20);
 		layout.setVgap(20);
 		layout.setPadding(new Insets(10, 10, 10, 10));
 		Scene scene = new Scene(layout, 600, 450);
 
-		// StudyMaterials list
-		ObservableList<Object> studyMaterialsCells = FXCollections.observableArrayList();
+		// build the StudyMaterials list
+		studyMaterialsCells = FXCollections.observableArrayList();
 		for (Deck deck : studySet.getDecks()) {
 			studyMaterialsCells.add(deck);
 		}
@@ -94,21 +95,7 @@ public class StudySetWindow {
 		addButton.setPrefWidth(80);
 		addButton.setPromptText("Add");
 		addButton.valueProperty().addListener((event, oldValue, newValue) -> {
-			if (newValue == "Add Deck") {
-				Optional<String> deckName = addStudyMaterial("Deck");
-				if (deckName.isPresent()) {
-					Deck newDeck = new Deck(deckName.get());
-					studyMaterialsCells.add(newDeck);
-					editStudyMaterial(newDeck);
-				}
-			} else if (newValue == "Add Quiz") {
-				Optional<String> quizName = addStudyMaterial("Quiz");
-				if (quizName.isPresent()) {
-					Quiz newQuiz = new Quiz(quizName.get());
-					studyMaterialsCells.add(newQuiz);
-					editStudyMaterial(newQuiz);
-				}
-			}
+			addStudyMaterial(newValue);
 		});
 		GridPane.setConstraints(addButton, 0, 2);
 		
@@ -116,8 +103,7 @@ public class StudySetWindow {
 		openButton.setPrefWidth(80);
 		openButton.disableProperty().bind(studyMaterialsList.getSelectionModel().selectedItemProperty().isNull());
 		openButton.setOnAction(event -> {
-			Object selectedStudyMaterial = studyMaterialsList.getSelectionModel().getSelectedItem();
-			openStudyMaterial(selectedStudyMaterial);
+			openStudyMaterial(studyMaterialsList.getSelectionModel().getSelectedItem());
 		});
 		GridPane.setConstraints(openButton, 1, 2, 1, 1, HPos.RIGHT, VPos.CENTER, Priority.ALWAYS, Priority.NEVER);
 		
@@ -125,8 +111,7 @@ public class StudySetWindow {
 		editButton.setPrefWidth(80);
 		editButton.disableProperty().bind(studyMaterialsList.getSelectionModel().selectedItemProperty().isNull());
 		editButton.setOnAction(event -> {
-			Object selectedStudyMaterial = studyMaterialsList.getSelectionModel().getSelectedItem();
-			editStudyMaterial(selectedStudyMaterial);
+			editStudyMaterial(studyMaterialsList.getSelectionModel().getSelectedItem());
 		});
 		GridPane.setConstraints(editButton, 2, 2);
 		
@@ -134,11 +119,7 @@ public class StudySetWindow {
 		deleteButton.setPrefWidth(80);
 		deleteButton.disableProperty().bind(studyMaterialsList.getSelectionModel().selectedItemProperty().isNull());
 		deleteButton.setOnAction(event -> {
-			Object selectedStudyMaterial = studyMaterialsList.getSelectionModel().getSelectedItem();
-			Optional<Boolean> confirmDeletion = deleteStudyMaterial(selectedStudyMaterial);
-			if (confirmDeletion.isPresent() && confirmDeletion.get() == true) {
-				studyMaterialsCells.remove(selectedStudyMaterial);
-			}
+			deleteStudyMaterial(studyMaterialsList.getSelectionModel().getSelectedItem());
 		});
 		GridPane.setConstraints(deleteButton, 3, 2);
 		
@@ -147,9 +128,14 @@ public class StudySetWindow {
 		Main.setScene(scene);
 	}
 	
-	public Optional<String> addStudyMaterial(String studyMaterial) {
+	public void addStudyMaterial(String type) {
+		// prompt the user for a name
 		Dialog<String> addDialog = new Dialog<String>();
-		addDialog.setTitle("Add a new " + studyMaterial);
+		if (type.equals("Add Deck")) {
+			addDialog.setTitle("Add a new deck");
+		} else if (type.equals("Add Quiz")) {
+			addDialog.setTitle("Add a new quiz");
+		}
 		TextField studyMaterialText = new TextField();
 		HBox layout = new HBox(studyMaterialText);
 		layout.setPadding(new Insets(10, 10, 10, 10));
@@ -164,7 +150,20 @@ public class StudySetWindow {
 			}
 			return null;
 		});
-		return addDialog.showAndWait();
+		
+		// create the desired study material
+		Optional<String> studyMaterialName = addDialog.showAndWait();
+		if (studyMaterialName.isPresent()) {
+			if (type.equals("Add Deck")) {
+				Deck newDeck = new Deck(studyMaterialName.get());
+				studyMaterialsCells.add(newDeck);
+				editStudyMaterial(newDeck);
+			} else if (type.equals("Add Quiz")) {
+				Quiz newQuiz = new Quiz(studyMaterialName.get());
+				studyMaterialsCells.add(newQuiz);
+				editStudyMaterial(newQuiz);
+			}
+		}
 	}
 	
 	public void openStudyMaterial(Object studyMaterial) {
@@ -177,14 +176,14 @@ public class StudySetWindow {
 	
 	public void editStudyMaterial(Object studyMaterial) {
 		if (studyMaterial.getClass().equals(Deck.class)) {
-			//DeckWindow deckWindow = new DeckWindow((Deck) studyMaterial, stage);
-			//stage.close();
+			// TODO
 		} else if (studyMaterial.getClass().equals(Quiz.class)) {
 			QuizEditWindow quizEditWindow = new QuizEditWindow((Quiz) studyMaterial);
 		}
 	}
 	
-	public Optional<Boolean> deleteStudyMaterial(Object studyMaterial) {
+	public void deleteStudyMaterial(Object studyMaterial) {
+		// prompt the user to delete the study material
 		Dialog<Boolean> deleteDialog = new Dialog<Boolean>();
 		Label contentLabel = new Label();
 		if (studyMaterial.getClass().equals(Deck.class)) {
@@ -209,6 +208,11 @@ public class StudySetWindow {
 			}
 			return null;
 		});
-		return deleteDialog.showAndWait();
+		
+		// act accordingly
+		Optional<Boolean> result = deleteDialog.showAndWait();
+		if (result.isPresent() && result.get() == true) {
+			studyMaterialsCells.remove(studyMaterial);
+		}
 	}
 }

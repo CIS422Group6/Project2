@@ -10,7 +10,6 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.layout.GridPane;
-import javafx.stage.Stage;
 
 public class DeckWindow {
 	int currentQuestion = 0;
@@ -20,6 +19,7 @@ public class DeckWindow {
 		layout.setHgap(20);
 		layout.setVgap(20);
 		layout.setPadding(new Insets(10, 10, 10, 10));
+		Scene scene = new Scene(layout, 600, 450);
 		
 		SimpleDateFormat df =new SimpleDateFormat("yyyy/MM/dd");
 		Date now = new Date();
@@ -27,7 +27,7 @@ public class DeckWindow {
 		long deckDate = 0;
 		
 		try {
-			deckDate=df.parse(deck.getDate()).getTime();
+			deckDate = df.parse(deck.getDate()).getTime();
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -105,10 +105,7 @@ public class DeckWindow {
 		});
 		layout.add(hard, 3, 2);
 		
-		
-		
-		Scene scene = new Scene(layout);
-		Main.stage.setScene(scene);
+		Main.setScene(scene);
 	}
 	
 	public void finish(){

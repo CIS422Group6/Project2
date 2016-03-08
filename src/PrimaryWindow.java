@@ -28,7 +28,7 @@ public class PrimaryWindow {
 	public PrimaryWindow() {
 		// layout manager
 		GridPane layout = new GridPane();
-		layout.setGridLinesVisible(true);
+		//layout.setGridLinesVisible(true);
 		layout.setHgap(20);
 		layout.setVgap(20);
 		layout.setPadding(new Insets(10, 10, 10, 10));
@@ -37,7 +37,7 @@ public class PrimaryWindow {
 		// GUI components
 		Rectangle userImage = new Rectangle();
 		Pane space1 = new Pane();
-		Label userLabel = new Label("Default"),
+		Label userLabel = new Label("Guest"),
 				studySetsLabel = new Label("StudySets");
 		ListView<StudySet> studySetsList = new ListView<StudySet>(Main.loadedStudySets);
 		Button settingsButton = new Button("Settings"),
@@ -71,7 +71,6 @@ public class PrimaryWindow {
 		// exit button
 		exitButton.setPrefWidth(80);
 		exitButton.setOnAction(event -> {
-			// TODO exit/logout button
 			Main.closeScene();
 		});
 		GridPane.setConstraints(exitButton, 0, 4, 1, 1, HPos.CENTER, VPos.TOP, Priority.NEVER, Priority.ALWAYS);
@@ -87,13 +86,7 @@ public class PrimaryWindow {
 		// add button
 		addButton.setPrefWidth(80);
 		addButton.setOnAction(event -> {
-			StudySet newStudySet = new StudySet();
-			Optional<String> studySetName = editStudySet(newStudySet);
-			if (studySetName.isPresent()) {
-				newStudySet.setName(studySetName.get());
-				Main.loadedStudySets.add(newStudySet);
-				openStudySet(newStudySet);
-			}
+			addStudySet();
 		});
 		GridPane.setConstraints(addButton, 1, 5, 1, 1, HPos.LEFT, VPos.TOP);
 		
@@ -109,12 +102,8 @@ public class PrimaryWindow {
 		editButton.setPrefWidth(80);
 		editButton.disableProperty().bind(studySetsList.getSelectionModel().selectedItemProperty().isNull());
 		editButton.setOnAction(event -> {
-			StudySet selectedStudySet = studySetsList.getSelectionModel().getSelectedItem();
-			Optional<String> studySetName = editStudySet(selectedStudySet);
-			if (studySetName.isPresent()) {
-				selectedStudySet.setName(studySetName.get());
-				studySetsList.refresh();
-			}
+			editStudySet(studySetsList.getSelectionModel().getSelectedItem());
+			studySetsList.refresh();
 		});
 		GridPane.setConstraints(editButton, 3, 5, 1, 1, HPos.RIGHT, VPos.TOP);
 		
@@ -122,11 +111,7 @@ public class PrimaryWindow {
 		deleteButton.setPrefWidth(80);
 		deleteButton.disableProperty().bind(studySetsList.getSelectionModel().selectedItemProperty().isNull());
 		deleteButton.setOnAction(event -> {
-			StudySet selectedStudySet = studySetsList.getSelectionModel().getSelectedItem();
-			Optional<Boolean> confirmDeletion = deleteStudySet(selectedStudySet);
-			if (confirmDeletion.isPresent() && confirmDeletion.get() == true) {
-				Main.loadedStudySets.remove(selectedStudySet);
-			}
+			deleteStudySet(studySetsList.getSelectionModel().getSelectedItem());
 		});
 		GridPane.setConstraints(deleteButton, 4, 5, 1, 1, HPos.RIGHT, VPos.TOP);
 		
@@ -135,17 +120,42 @@ public class PrimaryWindow {
 		Main.setScene(scene);
 	}
 	
+	public void addStudySet() {
+		// prompt the user for a name
+		Dialog<String> addDialog = new Dialog<String>();
+		addDialog.setTitle("Add a new StudySet");
+		TextField studySetText = new TextField();
+		HBox layout = new HBox(studySetText);
+		layout.setPadding(new Insets(10, 10, 10, 10));
+		HBox.setHgrow(studySetText, Priority.ALWAYS);
+		addDialog.getDialogPane().setContent(layout);
+		ButtonType editButton = new ButtonType("Edit", ButtonData.YES);
+		ButtonType cancelButton = new ButtonType("Cancel", ButtonData.CANCEL_CLOSE);
+		addDialog.getDialogPane().getButtonTypes().addAll(editButton, cancelButton);
+		addDialog.setResultConverter(result -> {
+			if (result == editButton) {
+				return studySetText.getText();
+			}
+			return null;
+		});
+		
+		// create a StudySet with the given name
+		Optional<String> studySetName = addDialog.showAndWait();
+		if (studySetName.isPresent()) {
+			StudySet newStudySet = new StudySet(studySetName.get());
+			Main.loadedStudySets.add(newStudySet);
+			openStudySet(newStudySet);
+		}
+	}
+	
 	public void openStudySet(StudySet studySet) {
 		StudySetWindow studySetWindow = new StudySetWindow(studySet);
 	}
 	
-	public Optional<String> editStudySet(StudySet studySet) {
+	public void editStudySet(StudySet studySet) {
+		// prompt the user to edit the StudySet
 		Dialog<String> editDialog = new Dialog<String>();
-		if (studySet.getName().isEmpty()) {
-			editDialog.setTitle("Add a new StudySet");
-		} else {
-			editDialog.setTitle("Edit a StudySet");
-		}
+		editDialog.setTitle("Edit a StudySet");
 		TextField studySetText = new TextField(studySet.getName());
 		HBox layout = new HBox(studySetText);
 		layout.setPadding(new Insets(10, 10, 10, 10));
@@ -160,10 +170,16 @@ public class PrimaryWindow {
 			}
 			return null;
 		});
-		return editDialog.showAndWait();
+		
+		// rename the StudySet
+		Optional<String> studySetName = editDialog.showAndWait();
+		if (studySetName.isPresent()) {
+			studySet.setName(studySetName.get());
+		}
 	}
 	
-	public Optional<Boolean> deleteStudySet(StudySet studySet) {
+	public void deleteStudySet(StudySet studySet) {
+		// prompt the user to delete the StudySet
 		Dialog<Boolean> deleteDialog = new Dialog<Boolean>();
 		deleteDialog.setTitle("Delete a StudySet");
 		Label contentLabel = new Label("Are you sure you want to delete the StudySet " + studySet.getName() + "?");
@@ -180,6 +196,16 @@ public class PrimaryWindow {
 			}
 			return null;
 		});
-		return deleteDialog.showAndWait();
+		
+		// act accordingly
+		Optional<Boolean> result = deleteDialog.showAndWait();
+		if (result.isPresent() && result.get() == true) {
+			studySet.delete();
+			Main.loadedStudySets.remove(studySet);
+		}
+	}
+	
+	public void close() {
+		
 	}
 }

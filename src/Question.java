@@ -12,7 +12,6 @@ public class Question {
 		setType(type);
 		setQuestion(question);
 		setRightAnswer(rightAnswer);
-		
 	}
 	
 	//empty constructor
@@ -23,13 +22,11 @@ public class Question {
 	//clone function will go here soon
 	
 	public String toString() {
-		if (type == "tf") {
-			return question + " (T/F)";
-		} else if (type == "mc") {
-			return question + " (MC, " + (wrongAnswers.size() + 1) + " choices)";
-		} else {
-			return "";
-		}
+		String text = question;
+		if (type.equals("tf")) text += " (T/F)";
+		else if (type.equals("mc")) text += " (MC)";
+		else if (type.equals("txt")) text += " (TXT)";
+		return text;
 	}
 	
 	//setters
