@@ -4,6 +4,8 @@ import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.geometry.VPos;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert.AlertType;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Dialog;
@@ -28,7 +30,6 @@ public class PrimaryWindow {
 	public PrimaryWindow() {
 		// layout manager
 		GridPane layout = new GridPane();
-		//layout.setGridLinesVisible(true);
 		layout.setHgap(20);
 		layout.setVgap(20);
 		layout.setPadding(new Insets(10, 10, 10, 10));
@@ -64,7 +65,34 @@ public class PrimaryWindow {
 		// settings button
 		settingsButton.setPrefWidth(80);
 		settingsButton.setOnAction(event -> {
-			// TODO settings button
+			Dialog<Void> settingsDialog = new Dialog<Void>();
+			settingsDialog.setTitle("Settings");
+			Button clearStatistics = new Button("Clear statistics");
+			clearStatistics.setPrefWidth(160);
+			clearStatistics.setOnAction(bEvent -> {
+				Alert confirmClear = new Alert(AlertType.CONFIRMATION);
+				confirmClear.setTitle("Clear settings");
+				confirmClear.setHeaderText("Are you sure you want to delete all statistics for all StudySets?");
+				Optional<ButtonType> result = confirmClear.showAndWait();
+				if (result.isPresent() && result.get() == ButtonType.OK) {
+					for (StudySet s : Main.loadedStudySets) {
+						for (Deck d : s.getDecks()) {
+							for (Card c : d.getCards()) {
+								c.setReviewTime(0);
+							}
+						}
+						for (Quiz q : s.getQuizzes()) {
+							q.getStats().clear();
+						}
+					}
+				}
+			});
+			HBox settingsLayout = new HBox(clearStatistics);
+			settingsLayout.setPadding(new Insets(10, 10, 10, 10));
+			settingsDialog.getDialogPane().setContent(settingsLayout);
+			ButtonType doneButton = new ButtonType("Done", ButtonData.OK_DONE);
+			settingsDialog.getDialogPane().getButtonTypes().addAll(doneButton);
+			settingsDialog.showAndWait();
 		});
 		GridPane.setConstraints(settingsButton, 0, 3, 1, 1, HPos.CENTER, VPos.TOP);
 

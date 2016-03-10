@@ -282,6 +282,8 @@ public class StudySet {
 				}
 			}
 		} catch (Exception e) {
+			// prevents loading imported/exported xmls
+			setName("error");
 			e.printStackTrace();
 		}
 	}
@@ -303,7 +305,7 @@ public class StudySet {
 					System.out.println(filename);
 					StudySet studySet = new StudySet();
 					studySet.load(file.getPath());
-					studySets.add(studySet);
+					if (studySet.getName() != "error") studySets.add(studySet);
 				}
 			}
 		}

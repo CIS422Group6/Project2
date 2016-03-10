@@ -2,6 +2,7 @@ import java.io.File;
 
 import java.util.Optional;
 
+import javafx.beans.binding.Bindings;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.HPos;
@@ -53,6 +54,7 @@ public class StudySetWindow {
 				statisticsButton = new Button("Statistics"),
 				openButton = new Button("Open"),
 				editButton = new Button("Edit"),
+				exportButton = new Button("Export"),
 				deleteButton = new Button("Delete");
 
 		// close button
@@ -70,30 +72,33 @@ public class StudySetWindow {
 			Main.closeScene();
 		});
 		GridPane.setConstraints(closeButton, 0, 0);
-		
+
 		// StudySet label
 		studySetLabel.setPrefHeight(20);
 		GridPane.setConstraints(studySetLabel, 1, 0, 2, 1, HPos.CENTER, VPos.CENTER, Priority.ALWAYS, Priority.NEVER);
-		
+
 		// statistics button
 		statisticsButton.setPrefWidth(80);
 		statisticsButton.disableProperty().bind(studyMaterialsList.getSelectionModel().selectedItemProperty().isNull());
 		statisticsButton.setOnAction(event -> {
-			// TODO statistics button
-			Quiz selectedQuiz = (Quiz) studyMaterialsList.getSelectionModel().getSelectedItem();
-			Alert statisticsWindow = new Alert(AlertType.INFORMATION);
-			String stats = "";
-			for (QuizStat q : selectedQuiz.getStats()) {
-				stats += "score: " + q.getScore() + " | date: " + q.getDate() + "\n";
+			if (studyMaterialsList.getSelectionModel().getSelectedItem().getClass().equals(Quiz.class)) {
+				Quiz selectedQuiz = (Quiz) studyMaterialsList.getSelectionModel().getSelectedItem();
+				Alert statisticsWindow = new Alert(AlertType.INFORMATION);
+				String stats = "";
+				for (QuizStat q : selectedQuiz.getStats()) {
+					String score = String.format("%.2f", (double) q.getScore() / selectedQuiz.getQuestions().size() * 100);
+					stats += "You scored " + score + "% on " + q.getDate() + "\n";
+				}
+				if (stats == "") stats = "No statistics have been recorded yet.";
+				statisticsWindow.setHeaderText(stats);
+				statisticsWindow.showAndWait();
 			}
-			statisticsWindow.setContentText(stats);
-			statisticsWindow.showAndWait();
 		});
-		GridPane.setConstraints(statisticsButton, 3, 0);
-		
+		GridPane.setConstraints(statisticsButton, 4, 0);
+
 		// StudyMaterials list
-		GridPane.setConstraints(studyMaterialsList, 0, 1, 4, 1, HPos.CENTER, VPos.CENTER, Priority.ALWAYS, Priority.ALWAYS);
-		
+		GridPane.setConstraints(studyMaterialsList, 0, 1, 5, 1, HPos.CENTER, VPos.CENTER, Priority.ALWAYS, Priority.ALWAYS);
+
 		// add button
 		addButton.setPrefWidth(80);
 		addButton.setPromptText("Add");
@@ -101,7 +106,7 @@ public class StudySetWindow {
 			addStudyMaterial(newValue);
 		});
 		GridPane.setConstraints(addButton, 0, 2);
-		
+
 		// open button
 		openButton.setPrefWidth(80);
 		openButton.disableProperty().bind(studyMaterialsList.getSelectionModel().selectedItemProperty().isNull());
@@ -109,7 +114,7 @@ public class StudySetWindow {
 			openStudyMaterial(studyMaterialsList.getSelectionModel().getSelectedItem());
 		});
 		GridPane.setConstraints(openButton, 1, 2, 1, 1, HPos.RIGHT, VPos.CENTER, Priority.ALWAYS, Priority.NEVER);
-		
+
 		// edit button
 		editButton.setPrefWidth(80);
 		editButton.disableProperty().bind(studyMaterialsList.getSelectionModel().selectedItemProperty().isNull());
@@ -117,20 +122,28 @@ public class StudySetWindow {
 			editStudyMaterial(studyMaterialsList.getSelectionModel().getSelectedItem());
 		});
 		GridPane.setConstraints(editButton, 2, 2);
-		
+
+		// export button
+		exportButton.setPrefWidth(80);
+		exportButton.disableProperty().bind(studyMaterialsList.getSelectionModel().selectedItemProperty().isNull());
+		exportButton.setOnAction(event -> {
+			exportStudyMaterial(studyMaterialsList.getSelectionModel().getSelectedItem());
+		});
+		GridPane.setConstraints(exportButton, 3, 2);
+
 		// delete button
 		deleteButton.setPrefWidth(80);
 		deleteButton.disableProperty().bind(studyMaterialsList.getSelectionModel().selectedItemProperty().isNull());
 		deleteButton.setOnAction(event -> {
 			deleteStudyMaterial(studyMaterialsList.getSelectionModel().getSelectedItem());
 		});
-		GridPane.setConstraints(deleteButton, 3, 2);
-		
+		GridPane.setConstraints(deleteButton, 4, 2);
+
 		// build and display the window
-		layout.getChildren().addAll(closeButton, studySetLabel, statisticsButton, studyMaterialsList, addButton, openButton, editButton, deleteButton);
+		layout.getChildren().addAll(closeButton, studySetLabel, statisticsButton, studyMaterialsList, addButton, openButton, editButton, exportButton, deleteButton);
 		Main.setScene(scene);
 	}
-	
+
 	public void addStudyMaterial(String type) {
 		// prompt the user for a name
 		Dialog<String> addDialog = new Dialog<String>();
@@ -160,21 +173,33 @@ public class StudySetWindow {
 				if (file != null) {
 					if (type.equals("Add Deck")) {
 						Deck newDeck = new Deck();
-						newDeck.deckImport(file.getPath());
-						studyMaterialsCells.add(newDeck);
-						editStudyMaterial(newDeck);
+						if (newDeck.deckImport(file.getPath())) {
+							studyMaterialsCells.add(newDeck);
+							editStudyMaterial(newDeck);
+						} else {
+							Alert importFailed = new Alert(AlertType.ERROR);
+							importFailed.setTitle("Import failed");
+							importFailed.setHeaderText("Failed to import a deck from the file!");
+							importFailed.showAndWait();
+						}
 					} else if (type.equals("Add Quiz")) {
 						Quiz newQuiz = new Quiz();
-						newQuiz.quizImport(file.getPath());
-						studyMaterialsCells.add(newQuiz);
-						editStudyMaterial(newQuiz);
+						if (newQuiz.quizImport(file.getPath())) {
+							studyMaterialsCells.add(newQuiz);
+							editStudyMaterial(newQuiz);
+						} else {
+							Alert importFailed = new Alert(AlertType.ERROR);
+							importFailed.setTitle("Import failed");
+							importFailed.setHeaderText("Failed to import a quiz from the file!");
+							importFailed.showAndWait();
+						}
 					}
 				}
 				return null;
 			}
 			return null;
 		});
-		
+
 		// create the desired study material
 		Optional<String> studyMaterialName = addDialog.showAndWait();
 		if (studyMaterialName.isPresent()) {
@@ -189,7 +214,7 @@ public class StudySetWindow {
 			}
 		}
 	}
-	
+
 	public void openStudyMaterial(Object studyMaterial) {
 		if (studyMaterial.getClass().equals(Deck.class)) {
 			DeckWindow deckWindow = new DeckWindow((Deck) studyMaterial);
@@ -197,7 +222,7 @@ public class StudySetWindow {
 			QuizWindow quizWindow = new QuizWindow((Quiz) studyMaterial);
 		}
 	}
-	
+
 	public void editStudyMaterial(Object studyMaterial) {
 		if (studyMaterial.getClass().equals(Deck.class)) {
 			// TODO
@@ -205,7 +230,24 @@ public class StudySetWindow {
 			QuizEditWindow quizEditWindow = new QuizEditWindow((Quiz) studyMaterial);
 		}
 	}
-	
+
+	public void exportStudyMaterial(Object studyMaterial) {
+		FileChooser exportWindow = new FileChooser();
+		FileChooser.ExtensionFilter xml = new FileChooser.ExtensionFilter("eXtensibleMarkup Language file", "*.xml");
+		File file = null;
+		exportWindow.getExtensionFilters().add(xml);
+		file = exportWindow.showSaveDialog(Main.stage);
+		if (file != null) {
+			if (studyMaterial.getClass().equals(Deck.class)) {
+				Deck exportDeck = (Deck) studyMaterial;
+				exportDeck.export(file.getPath());
+			} else if (studyMaterial.getClass().equals(Quiz.class)) {
+				Quiz exportQuiz = (Quiz) studyMaterial;
+				exportQuiz.export(file.getPath());
+			}
+		}
+	}
+
 	public void deleteStudyMaterial(Object studyMaterial) {
 		// prompt the user to delete the study material
 		Dialog<Boolean> deleteDialog = new Dialog<Boolean>();
@@ -224,32 +266,15 @@ public class StudySetWindow {
 		HBox.setHgrow(contentLabel, Priority.ALWAYS);
 		deleteDialog.getDialogPane().setContent(layout);
 		ButtonType deleteButton = new ButtonType("Delete", ButtonData.YES);
-		ButtonType exportButton = new ButtonType("Export", ButtonData.LEFT);
 		ButtonType cancelButton = new ButtonType("Cancel", ButtonData.CANCEL_CLOSE);
-		deleteDialog.getDialogPane().getButtonTypes().addAll(deleteButton, exportButton, cancelButton);
+		deleteDialog.getDialogPane().getButtonTypes().addAll(deleteButton, cancelButton);
 		deleteDialog.setResultConverter(result -> {
 			if (result == deleteButton) {
 				return true;
-			} else if (result == exportButton) {
-				FileChooser exportWindow = new FileChooser();
-				FileChooser.ExtensionFilter xml = new FileChooser.ExtensionFilter("eXtensibleMarkup Language file", "*.xml");
-				File file = null;
-				exportWindow.getExtensionFilters().add(xml);
-				file = exportWindow.showSaveDialog(Main.stage);
-				if (file != null) {
-					if (studyMaterial.getClass().equals(Deck.class)) {
-						Deck exportDeck = (Deck) studyMaterial;
-						exportDeck.export(file.getPath());
-					} else if (studyMaterial.getClass().equals(Quiz.class)) {
-						Quiz exportQuiz = (Quiz) studyMaterial;
-						exportQuiz.export(file.getPath());
-					}
-				}
-				return null;
 			}
 			return null;
 		});
-		
+
 		// act accordingly
 		Optional<Boolean> result = deleteDialog.showAndWait();
 		if (result.isPresent() && result.get() == true) {
