@@ -40,6 +40,7 @@ public class DeckWindow {
 
 		if(cards.peek()==null){
 			System.out.println("null");
+			Main.setScene(scene);
 			finish();
 		}
 
