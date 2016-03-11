@@ -1,4 +1,3 @@
-
 import java.util.ArrayList;
 import java.util.List;
 import java.io.File;
@@ -8,12 +7,16 @@ import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
-
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+/**
+ * A custom data-type that represents a StudySet. Currently, a StudySet can contain any number of
+ * Decks and Quizzes, a name, and a save a location.
+ * @author jack
+ */
 public class StudySet {
 	private String name, path;
 	private List<Quiz> quizzes;
@@ -195,7 +198,7 @@ public class StudySet {
 			e.printStackTrace();
 		}
 	}
-	
+
 	//load function, takes a String variable for a path
 	//to use this load function, create a new blank StudySet, then call load(path) to read contents from file into class structures
 	public void load(String path){
@@ -221,7 +224,6 @@ public class StudySet {
 				if(quizNode.getNodeType() == Node.ELEMENT_NODE){
 					Element quizEle = (Element) quizNode;
 					Quiz quiz = new Quiz(quizEle.getElementsByTagName("name").item(0).getTextContent());
-					//System.out.println(quizEle.getElementsByTagName("name").item(0).getTextContent());
 					NodeList questionList = quizEle.getElementsByTagName("question");
 
 					for(int j = 0; j < questionList.getLength();j++){
@@ -287,7 +289,7 @@ public class StudySet {
 			e.printStackTrace();
 		}
 	}
-	
+
 	public void delete() {
 		File file = new File(path);
 		file.delete();
@@ -302,10 +304,11 @@ public class StudySet {
 				String filename = file.getName();
 				String extension = filename.substring(filename.lastIndexOf(".") + 1, filename.length());
 				if (extension.equals("xml")) {
-					System.out.println(filename);
 					StudySet studySet = new StudySet();
 					studySet.load(file.getPath());
-					if (studySet.getName() != "error") studySets.add(studySet);
+					if (studySet.getName() != "error") {
+						studySets.add(studySet);
+					}
 				}
 			}
 		}

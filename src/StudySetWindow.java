@@ -1,8 +1,5 @@
 import java.io.File;
-
 import java.util.Optional;
-
-import javafx.beans.binding.Bindings;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.HPos;
@@ -24,26 +21,32 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.stage.FileChooser;
 
+/**
+ * The window for displaying StudySets. Currently, a StudySet can contain a Deck or a Quiz, and
+ * these can be added or modified here using the buttons. Statistics can also be viewed.
+ * @author richard
+ */
 public class StudySetWindow {
+	// backing data for the GUI list
 	ObservableList<Object> studyMaterialsCells;
 
+	/**
+	 * Creates an instance of StudySetWindow, building all the relevant GUI components and adding
+	 * them to a Scene to be displayed on the Stage.
+	 * @param studySet the StudySet to be loaded
+	 */
 	public StudySetWindow(StudySet studySet) {
 		// layout manager
 		GridPane layout = new GridPane();
-		//layout.setGridLinesVisible(true);
 		layout.setHgap(20);
 		layout.setVgap(20);
 		layout.setPadding(new Insets(10, 10, 10, 10));
 		Scene scene = new Scene(layout, 600, 450);
 
-		// build the StudyMaterials list
+		// build the StudyMaterials list of both Deck and Quiz
 		studyMaterialsCells = FXCollections.observableArrayList();
-		for (Deck deck : studySet.getDecks()) {
-			studyMaterialsCells.add(deck);
-		}
-		for (Quiz quiz : studySet.getQuizzes()) {
-			studyMaterialsCells.add(quiz);
-		}
+		for (Deck deck : studySet.getDecks()) { studyMaterialsCells.add(deck); }
+		for (Quiz quiz : studySet.getQuizzes()) { studyMaterialsCells.add(quiz); }
 
 		// GUI components
 		Label studySetLabel = new Label(studySet.getName());
@@ -60,39 +63,21 @@ public class StudySetWindow {
 		// close button
 		closeButton.setPrefWidth(80);
 		closeButton.setOnAction(event -> {
-			studySet.getDecks().clear();
-			studySet.getQuizzes().clear();
-			for (Object studyMaterial : studyMaterialsCells) {
-				if (studyMaterial.getClass().equals(Deck.class)) {
-					studySet.getDecks().add((Deck) studyMaterial);
-				} else if (studyMaterial.getClass().equals(Quiz.class)) {
-					studySet.getQuizzes().add((Quiz) studyMaterial);
-				}
-			}
+			// update any changed data
+			close(studySet);
 			Main.closeScene();
 		});
 		GridPane.setConstraints(closeButton, 0, 0);
 
 		// StudySet label
 		studySetLabel.setPrefHeight(20);
-		GridPane.setConstraints(studySetLabel, 1, 0, 2, 1, HPos.CENTER, VPos.CENTER, Priority.ALWAYS, Priority.NEVER);
+		GridPane.setConstraints(studySetLabel, 1, 0, 3, 1, HPos.CENTER, VPos.CENTER, Priority.ALWAYS, Priority.NEVER);
 
 		// statistics button
 		statisticsButton.setPrefWidth(80);
 		statisticsButton.disableProperty().bind(studyMaterialsList.getSelectionModel().selectedItemProperty().isNull());
 		statisticsButton.setOnAction(event -> {
-			if (studyMaterialsList.getSelectionModel().getSelectedItem().getClass().equals(Quiz.class)) {
-				Quiz selectedQuiz = (Quiz) studyMaterialsList.getSelectionModel().getSelectedItem();
-				Alert statisticsWindow = new Alert(AlertType.INFORMATION);
-				String stats = "";
-				for (QuizStat q : selectedQuiz.getStats()) {
-					String score = String.format("%.2f", (double) q.getScore() / selectedQuiz.getQuestions().size() * 100);
-					stats += "You scored " + score + "% on " + q.getDate() + "\n";
-				}
-				if (stats == "") stats = "No statistics have been recorded yet.";
-				statisticsWindow.setHeaderText(stats);
-				statisticsWindow.showAndWait();
-			}
+			showStatistics(studyMaterialsList.getSelectionModel().getSelectedItem());
 		});
 		GridPane.setConstraints(statisticsButton, 4, 0);
 
@@ -144,33 +129,41 @@ public class StudySetWindow {
 		Main.setScene(scene);
 	}
 
+	/**
+	 * Handles the behaviour for the "Add" button. Prompts the user to name the new StudyMaterial
+	 * and creates one if indicated.
+	 * @param type the type of StudyMaterial to create (Deck or Quiz)
+	 */
 	public void addStudyMaterial(String type) {
 		// prompt the user for a name
-		Dialog<String> addDialog = new Dialog<String>();
+		Dialog<String> dialog = new Dialog<String>();
 		if (type.equals("Add Deck")) {
-			addDialog.setTitle("Add a new deck");
+			dialog.setTitle("Add a Deck");
 		} else if (type.equals("Add Quiz")) {
-			addDialog.setTitle("Add a new quiz");
+			dialog.setTitle("Add a Quiz");
 		}
 		TextField studyMaterialText = new TextField();
 		HBox layout = new HBox(studyMaterialText);
 		layout.setPadding(new Insets(10, 10, 10, 10));
 		HBox.setHgrow(studyMaterialText, Priority.ALWAYS);
-		addDialog.getDialogPane().setContent(layout);
+		dialog.getDialogPane().setContent(layout);
 		ButtonType addButton = new ButtonType("Add", ButtonData.YES);
 		ButtonType importButton = new ButtonType("Import", ButtonData.LEFT);
 		ButtonType cancelButton = new ButtonType("Cancel", ButtonData.CANCEL_CLOSE);
-		addDialog.getDialogPane().getButtonTypes().addAll(addButton, importButton, cancelButton);
-		addDialog.setResultConverter(result -> {
+		dialog.getDialogPane().getButtonTypes().addAll(addButton, importButton, cancelButton);
+		dialog.setResultConverter(result -> {
 			if (result == addButton) {
+				// return the new StudyMaterial name
 				return studyMaterialText.getText();
 			} else if (result == importButton) {
+				// prompt the user to select a file to import
 				FileChooser importWindow = new FileChooser();
 				FileChooser.ExtensionFilter xml = new FileChooser.ExtensionFilter("eXtensibleMarkup Language file", "*.xml");
 				File file = null;
 				importWindow.getExtensionFilters().add(xml);
 				file = importWindow.showOpenDialog(Main.stage);
 				if (file != null) {
+					// attempt to import the selected file and warn if it fails
 					if (type.equals("Add Deck")) {
 						Deck newDeck = new Deck();
 						if (newDeck.deckImport(file.getPath())) {
@@ -179,7 +172,7 @@ public class StudySetWindow {
 						} else {
 							Alert importFailed = new Alert(AlertType.ERROR);
 							importFailed.setTitle("Import failed");
-							importFailed.setHeaderText("Failed to import a deck from the file!");
+							importFailed.setHeaderText("Failed to import the deck.");
 							importFailed.showAndWait();
 						}
 					} else if (type.equals("Add Quiz")) {
@@ -190,7 +183,7 @@ public class StudySetWindow {
 						} else {
 							Alert importFailed = new Alert(AlertType.ERROR);
 							importFailed.setTitle("Import failed");
-							importFailed.setHeaderText("Failed to import a quiz from the file!");
+							importFailed.setHeaderText("Failed to import the quiz.");
 							importFailed.showAndWait();
 						}
 					}
@@ -201,7 +194,7 @@ public class StudySetWindow {
 		});
 
 		// create the desired study material
-		Optional<String> studyMaterialName = addDialog.showAndWait();
+		Optional<String> studyMaterialName = dialog.showAndWait();
 		if (studyMaterialName.isPresent()) {
 			if (type.equals("Add Deck")) {
 				Deck newDeck = new Deck(studyMaterialName.get());
@@ -215,6 +208,11 @@ public class StudySetWindow {
 		}
 	}
 
+	/**
+	 * Handles the behaviour for the "Open" button. Determines the type of the selected
+	 * StudyMaterial and opens the appropiate window.
+	 * @param studyMaterial the StudyMaterial to be opened
+	 */
 	public void openStudyMaterial(Object studyMaterial) {
 		if (studyMaterial.getClass().equals(Deck.class)) {
 			DeckWindow deckWindow = new DeckWindow((Deck) studyMaterial);
@@ -223,20 +221,32 @@ public class StudySetWindow {
 		}
 	}
 
+	/**
+	 * Handles the behaviour for the "Edit" button. Determines the type of the selected
+	 * StudyMaterial and opens the appropiate window for editing.
+	 * @param studyMaterial the StudyMaterial to be edited
+	 */
 	public void editStudyMaterial(Object studyMaterial) {
 		if (studyMaterial.getClass().equals(Deck.class)) {
-			// TODO
+			DeckEditWindow quizEditWindow = new DeckEditWindow((Deck) studyMaterial);
 		} else if (studyMaterial.getClass().equals(Quiz.class)) {
 			QuizEditWindow quizEditWindow = new QuizEditWindow((Quiz) studyMaterial);
 		}
 	}
 
+	/**
+	 * Handles the behaviour for the "Export" button. Determines the type of the selected
+	 * StudyMaterial and prompts the user for a location to save to.
+	 * @param studyMaterial the StudyMaterial to be exported
+	 */
 	public void exportStudyMaterial(Object studyMaterial) {
+		// prompt the user for a location to save to
 		FileChooser exportWindow = new FileChooser();
 		FileChooser.ExtensionFilter xml = new FileChooser.ExtensionFilter("eXtensibleMarkup Language file", "*.xml");
 		File file = null;
 		exportWindow.getExtensionFilters().add(xml);
 		file = exportWindow.showSaveDialog(Main.stage);
+		// if a location is selected, export the StudyMaterial to there
 		if (file != null) {
 			if (studyMaterial.getClass().equals(Deck.class)) {
 				Deck exportDeck = (Deck) studyMaterial;
@@ -248,27 +258,32 @@ public class StudySetWindow {
 		}
 	}
 
+	/**
+	 * Handles the behaviour for the "Delete" button. Confirms with the user whether they want to
+	 * delete the selected StudyMaterial.
+	 * @param studyMaterial the StudyMaterial to be deleted
+	 */
 	public void deleteStudyMaterial(Object studyMaterial) {
 		// prompt the user to delete the study material
-		Dialog<Boolean> deleteDialog = new Dialog<Boolean>();
+		Dialog<Boolean> dialog = new Dialog<Boolean>();
 		Label contentLabel = new Label();
 		if (studyMaterial.getClass().equals(Deck.class)) {
 			Deck deck = (Deck) studyMaterial;
-			deleteDialog.setTitle("Delete a Deck");
+			dialog.setTitle("Delete a Deck");
 			contentLabel.setText("Are you sure you want to delete the deck " + deck.getName() + "?");
 		} else if (studyMaterial.getClass().equals(Quiz.class)) {
 			Quiz quiz = (Quiz) studyMaterial;
-			deleteDialog.setTitle("Delete a Quiz");
+			dialog.setTitle("Delete a Quiz");
 			contentLabel.setText("Are you sure you want to delete the quiz " + quiz.getName() + "?");
 		}
 		HBox layout = new HBox(contentLabel);
 		layout.setPadding(new Insets(10, 10, 10, 10));
 		HBox.setHgrow(contentLabel, Priority.ALWAYS);
-		deleteDialog.getDialogPane().setContent(layout);
+		dialog.getDialogPane().setContent(layout);
 		ButtonType deleteButton = new ButtonType("Delete", ButtonData.YES);
 		ButtonType cancelButton = new ButtonType("Cancel", ButtonData.CANCEL_CLOSE);
-		deleteDialog.getDialogPane().getButtonTypes().addAll(deleteButton, cancelButton);
-		deleteDialog.setResultConverter(result -> {
+		dialog.getDialogPane().getButtonTypes().addAll(deleteButton, cancelButton);
+		dialog.setResultConverter(result -> {
 			if (result == deleteButton) {
 				return true;
 			}
@@ -276,9 +291,54 @@ public class StudySetWindow {
 		});
 
 		// act accordingly
-		Optional<Boolean> result = deleteDialog.showAndWait();
+		Optional<Boolean> result = dialog.showAndWait();
 		if (result.isPresent() && result.get() == true) {
 			studyMaterialsCells.remove(studyMaterial);
+		}
+	}
+
+	/**
+	 * Handles the behaviour for the "Statistics" button. Determines the type of the selected
+	 * StudyMaterial and displays the relevant statistics.
+	 * @param studyMaterial the StudyMaterial to be opened
+	 */
+	public void showStatistics(Object studyMaterial) {
+		// build the window
+		Alert dialog = new Alert(AlertType.INFORMATION);
+		String headerText = "";
+		if (studyMaterial.getClass().equals(Quiz.class)) {
+			Quiz quiz = (Quiz) studyMaterial;
+			// display each score
+			for (QuizStat q : quiz.getStats()) {
+				String score = String.format("%.2f", (double) q.getScore() / quiz.getQuestions().size() * 100);
+				headerText += "You scored " + score + "% on " + q.getDate() + "\n";
+			}
+			if (headerText == "") {
+				headerText = "No statistics have been recorded yet.";
+			}
+		} else if (studyMaterial.getClass().equals(Deck.class)) {
+			headerText = "There are no statistics for Decks!";
+		}
+		dialog.setHeaderText(headerText);
+		dialog.showAndWait();
+	}
+
+	/**
+	 * Handles the behaviour for the "Close" button. Saves any changes and returns to the
+	 * PrimaryWindow.
+	 * @param studySet the StudySet to be updated
+	 */
+	public void close(StudySet studySet) {
+		// clear the old data
+		studySet.getDecks().clear();
+		studySet.getQuizzes().clear();
+		// iterate through the backing data for the GUI list and update
+		for (Object studyMaterial : studyMaterialsCells) {
+			if (studyMaterial.getClass().equals(Deck.class)) {
+				studySet.getDecks().add((Deck) studyMaterial);
+			} else if (studyMaterial.getClass().equals(Quiz.class)) {
+				studySet.getQuizzes().add((Quiz) studyMaterial);
+			}
 		}
 	}
 }
