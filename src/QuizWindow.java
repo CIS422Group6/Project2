@@ -56,7 +56,7 @@ public class QuizWindow {
 			for (String s : userAnswers) {
 				if (s == null) { unanswered++; }
 			}
-			
+
 			// prompt the user for an action
 			Optional<Integer> result = finishQuiz(unanswered);
 			// act accordingly (1 = grade, 0 = discard, null = resume)
@@ -180,39 +180,39 @@ public class QuizWindow {
 		// build and display the window
 		layout.getChildren().addAll(finishButton, questionsCells);
 		Main.setScene(scene);
-		}
-
-		/**
-		 * Handles the behaviour for the "Finish" button. Prompts the user whether they would like
-		 * to Grade, Discard, or Resume the quiz and returns the choice.
-		 * @param unanswered total number of unanswered questions
-		 * @return An Optional type containing the user's choice
-		 */
-		public Optional<Integer> finishQuiz(int unanswered) {
-			// prompt the user
-			Dialog<Integer> dialog = new Dialog<Integer>();
-			dialog.setTitle("Finish the Quiz");
-			String prompt = "Are you sure you want to finish and grade the quiz?";
-			if (unanswered > 0) { prompt += " You have " + unanswered + " questions remaining."; }
-			Label finishLabel = new Label(prompt);
-			HBox layout = new HBox(finishLabel);
-			layout.setPadding(new Insets(10, 10, 10, 10));
-			HBox.setHgrow(finishLabel, Priority.ALWAYS);
-			dialog.getDialogPane().setContent(layout);
-
-			ButtonType gradeButton = new ButtonType("Grade", ButtonData.YES);
-			ButtonType discardButton = new ButtonType("Discard", ButtonData.OTHER);
-			ButtonType resumeButton = new ButtonType("Resume", ButtonData.CANCEL_CLOSE);
-			dialog.getDialogPane().getButtonTypes().addAll(gradeButton, discardButton, resumeButton);
-			dialog.setResultConverter(result -> {
-				if (result == gradeButton) {
-					return 1;
-				} else if (result == discardButton) {
-					return 0;
-				} else {
-					return null;
-				}
-			});
-			return dialog.showAndWait();
-		}
 	}
+
+	/**
+	 * Handles the behaviour for the "Finish" button. Prompts the user whether they would like
+	 * to Grade, Discard, or Resume the quiz and returns the choice.
+	 * @param unanswered total number of unanswered questions
+	 * @return An Optional type containing the user's choice
+	 */
+	public Optional<Integer> finishQuiz(int unanswered) {
+		// prompt the user
+		Dialog<Integer> dialog = new Dialog<Integer>();
+		dialog.setTitle("Finish the Quiz");
+		String prompt = "Are you sure you want to finish and grade the quiz?";
+		if (unanswered > 0) { prompt += " You have " + unanswered + " questions remaining."; }
+		Label finishLabel = new Label(prompt);
+		HBox layout = new HBox(finishLabel);
+		layout.setPadding(new Insets(10, 10, 10, 10));
+		HBox.setHgrow(finishLabel, Priority.ALWAYS);
+		dialog.getDialogPane().setContent(layout);
+
+		ButtonType gradeButton = new ButtonType("Grade", ButtonData.YES);
+		ButtonType discardButton = new ButtonType("Discard", ButtonData.OTHER);
+		ButtonType resumeButton = new ButtonType("Resume", ButtonData.CANCEL_CLOSE);
+		dialog.getDialogPane().getButtonTypes().addAll(gradeButton, discardButton, resumeButton);
+		dialog.setResultConverter(result -> {
+			if (result == gradeButton) {
+				return 1;
+			} else if (result == discardButton) {
+				return 0;
+			} else {
+				return null;
+			}
+		});
+		return dialog.showAndWait();
+	}
+}
